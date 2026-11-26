@@ -1,0 +1,56 @@
+# NexusOps synthetic telemetry generator config (Week 1, dataset v0)
+# Everything that changes the dataset lives here, so the same file + same code = same data.
+
+seed: 42                    # RNG seed. Change it and you get a different (but statistically similar) dataset.
+start: "2026-01-05T00:00:00Z"
+days: 14                    # 14 days x 1440 min x 4 services = 80,640 rows
+freq_minutes: 1             # one sample per service per minute (like a 60s Prometheus scrape)
+
+# SLO that defines "degradation" for a service at a given minute.
+slo:
+  p95_latency_ms: 450
+  error_rate_pct: 2.0
+
+# The label we want to PREDICT later: "will this service breach its SLO in the next N minutes?"
+prediction_horizon_minutes: 15
+
+# Fraction of rows where one metric is missing (simulates a failed scrape / exporter restart).
+missing_rate: 0.002
+
+# Fictional services of a fintech-style payment path. No real hostnames, IPs, or customer data.
+services:
+  api-gateway:
+    base_rps: 900
+    base_cpu_pct: 35
+    base_mem_pct: 45
+    base_latency_ms: 80
+    base_error_pct: 0.20
+  payments-api:
+    base_rps: 400
+    base_cpu_pct: 40
+    base_mem_pct: 55
+    base_latency_ms: 140
+    base_error_pct: 0.30
+  auth-svc:
+    base_rps: 650
+    base_cpu_pct: 30
+    base_mem_pct: 40
+    base_latency_ms: 60
+    base_error_pct: 0.15
+  ledger-db:
+    base_rps: 300
+    base_cpu_pct: 45
+    base_mem_pct: 65
+    base_latency_ms: 25
+    base_error_pct: 0.05
+
+incidents:
+  per_service_per_day: 0.6  # average number of incidents (Poisson) per service per day
+  min_duration_minutes: 25
+  max_duration_minutes: 90
+  ramp_fraction: 0.4         # first 40% of the incident is a gradual build-up (the "early warning" signal)
+  types:                     # relative weights
+    cpu_saturation: 1.0
+    memory_leak: 1.0
+    packet_loss: 1.0
+    db_pool_exhaustion: 1.0

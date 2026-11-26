@@ -1,0 +1,679 @@
+<title>NexusOps Week 1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: engineer's runbook. Sticky section index on the left (desktop), one reading column, monospace for anything you type. */
+:root{
+  --bg:#f5f7f7; --surface:#ffffff; --fg:#17211f; --muted:#56625f; --line:#d5dddb;
+  --accent:#b45309; --accent-soft:#fdf1e3; --teal:#0f6e66; --teal-soft:#e3f1ef;
+  --code-bg:#14201e; --code-fg:#e3ece9; --ok:#15803d; --bad:#b91c1c;
+  --f-body:"Inter",system-ui,sans-serif;
+  --f-head:"Space Grotesk",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1514; --surface:#151f1d; --fg:#e2eae8; --muted:#9aa8a4; --line:#2a3734;
+  --accent:#f0a24a; --accent-soft:#2c2116; --teal:#5cc4b8; --teal-soft:#14302c;
+  --code-bg:#0a100f; --code-fg:#dbe6e3; --ok:#4ade80; --bad:#f87171; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1514; --surface:#151f1d; --fg:#e2eae8; --muted:#9aa8a4; --line:#2a3734;
+  --accent:#f0a24a; --accent-soft:#2c2116; --teal:#5cc4b8; --teal-soft:#14302c;
+  --code-bg:#0a100f; --code-fg:#dbe6e3; --ok:#4ade80; --bad:#f87171; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 4rem}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)} nav.toc{display:none}}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;padding-top:2.2rem;font-size:14px;max-height:100vh;overflow:auto}
+nav.toc a{display:flex;gap:10px;color:var(--muted);text-decoration:none;padding:3px 0}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent)}
+nav.toc b{font-family:var(--f-mono);color:var(--teal);width:1.2em;flex:none}
+main{min-width:0}
+header.hero{padding-block:2.6rem 1.6rem;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal)}
+h1,h2,h3{font-family:var(--f-head);text-wrap:balance;line-height:1.25}
+h1{font-size:clamp(2rem,4.5vw,3rem);margin:.4rem 0 .6rem}
+h2{font-size:1.6rem;margin:3.2rem 0 .8rem;display:flex;gap:.6rem;align-items:baseline}
+h2 .k{font-family:var(--f-mono);font-size:.95rem;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:0 .4rem}
+h3{font-size:1.15rem;margin:2rem 0 .4rem}
+p,li{max-width:72ch}
+.lede{font-size:1.12rem;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--f-mono);font-size:13px;color:var(--muted);margin-top:1rem}
+.meta span b{color:var(--fg);font-weight:600}
+a{color:var(--teal)}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--teal-soft);padding:.05em .35em;border-radius:3px}
+pre{background:var(--code-bg);color:var(--code-fg);font-family:var(--f-mono);font-size:13.5px;line-height:1.6;padding:14px 16px;border-radius:6px;overflow-x:auto;margin:.8rem 0}
+pre code{background:none;padding:0;color:inherit}
+pre .c{color:#8fa6a0} pre .p{color:#f0a24a}
+pre.mermaid{background:var(--surface);color:var(--fg);border:1px solid var(--line)}
+.tbl{overflow-x:auto;margin:.8rem 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-head);font-weight:500;color:var(--muted);font-size:13px;letter-spacing:.03em}
+.note{background:var(--accent-soft);border-left:3px solid var(--accent);padding:10px 14px;margin:1rem 0;max-width:76ch}
+.note b:first-child{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);display:block}
+.en{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 20px 12px;margin:1rem 0}
+.en .tag{font-family:var(--f-mono);font-size:12px;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;margin-top:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.grid2>div{min-width:0}
+.ts{border-top:1px solid var(--line);padding-top:.6rem;margin-top:1.4rem}
+.ts dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:4px 14px;margin:.4rem 0}
+.ts dt{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);padding-top:3px}
+.ts dd{margin:0}
+@media (max-width:520px){.ts dl{grid-template-columns:minmax(0,1fr)} .ts dt{padding-top:8px}}
+.qa{border-top:1px solid var(--line);padding:.8rem 0}
+.qa .lvl{font-family:var(--f-mono);font-size:12px;color:var(--teal)}
+.qa .q{font-weight:600;margin:.2rem 0}
+.ok{color:var(--ok);font-weight:600} .bad{color:var(--bad);font-weight:600}
+ul.check{list-style:none;padding-left:0} ul.check li{padding-left:1.7em;position:relative}
+ul.check li::before{content:"";position:absolute;left:0;top:.45em;width:1em;height:1em;border:1.5px solid var(--teal);border-radius:3px}
+.final{background:var(--teal-soft);border:1px solid var(--teal);border-radius:8px;padding:6px 22px 16px;margin-top:2.4rem}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Sections">
+  <div class="eyebrow" style="margin-bottom:.6rem">Week 1</div>
+  <a href="#a"><b>A</b>Weekly theme</a>
+  <a href="#b"><b>B</b>Objectives</a>
+  <a href="#c"><b>C</b>Concepts</a>
+  <a href="#d"><b>D</b>Engineering notes</a>
+  <a href="#e"><b>E</b>Architecture</a>
+  <a href="#f"><b>F</b>Hands-on labs</a>
+  <a href="#g"><b>G</b>Scenario</a>
+  <a href="#h"><b>H</b>AI-assisted eng.</a>
+  <a href="#i"><b>I</b>Troubleshooting</a>
+  <a href="#j"><b>J</b>Assignment</a>
+  <a href="#k"><b>K</b>Success criteria</a>
+  <a href="#l"><b>L</b>Interview prep</a>
+  <a href="#m"><b>M</b>Resources</a>
+  <a href="#n"><b>N</b>Reflection</a>
+  <a href="#o"><b>O</b>Progress</a>
+  <a href="#before"><b>→</b>Before Week 2</a>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="eyebrow">NexusOps · Milestone 1 + 2 · Week 1 of the journey</div>
+  <h1>ML from zero, and the telemetry that will feed it</h1>
+  <p class="lede">This week you learn what ML is, why and where to use it, from first principles. You see the full NexusOps architecture and build the first synthetic telemetry dataset yourself. By the end you will have a reproducible dataset, 10 passing data tests, and a non-ML baseline that every later model must beat.</p>
+  <div class="meta"><span>Time <b>≈ 5 h</b></span><span>Stack <b>Python 3.11+, NumPy, pandas, PyArrow, pytest</b></span><span>Dataset <b>telemetry_v0 · 80,640 rows</b></span></div>
+</header>
+
+<!-- A -->
+<h2 id="a"><span class="k">A</span>Weekly theme</h2>
+<p><b>Understand the data before moving from rules to learning.</b></p>
+<p>You have run threshold-based alerting for years: <code>cpu &gt; 90%</code>, <code>latency &gt; 450ms</code>. It works, but it has two problems. First, the alert fires when customers are already affected. Second, every new failure mode needs a human to write a new rule. ML says: learn from history what "normal" looks like, and what the minutes <i>before</i> degradation look like.</p>
+<p>Why this matters in production: most ML system failures come from data, not from the model. A wrong schema, missing values, leakage, or a badly defined label will make even the best algorithm give wrong answers, and give them confidently. So Week 1 starts with a data contract and a reproducible dataset.</p>
+
+<!-- B -->
+<h2 id="b"><span class="k">B</span>Learning objectives</h2>
+<p>By the end of this week you can:</p>
+<ol>
+  <li>Explain the difference between AI, ML, Deep Learning, Generative AI, Data Science and MLOps to an interviewer in 30 seconds.</li>
+  <li>Draw the input/output diagram of traditional programming vs ML, and tell features, labels, parameters and hyperparameters apart.</li>
+  <li>Say which problems need classification, regression, clustering or anomaly detection, using NexusOps examples.</li>
+  <li>Explain overfitting, underfitting, bias/variance and data leakage with infrastructure examples.</li>
+  <li>Calculate mean, median, standard deviation, z-score and correlation by hand and in pandas.</li>
+  <li>Evaluate a detector with precision and recall, and show why accuracy lies on imbalanced data.</li>
+  <li>Run, understand and extend a seeded, config-driven telemetry generator.</li>
+  <li>Prove a dataset is reproducible with a content hash.</li>
+</ol>
+
+<!-- C -->
+<h2 id="c"><span class="k">C</span>Conceptual lessons</h2>
+
+<h3>C1. AI, ML, Deep Learning, Data Science, MLOps: what sits inside what</h3>
+<p>Think of it like networking: AI is the whole idea of "routing", ML is a dynamic routing protocol (it learns the paths itself), Deep Learning is one particularly powerful kind of protocol, and MLOps is the operations practice for running that protocol safely in a production network.</p>
+<pre class="mermaid">
+flowchart LR
+  subgraph AI["AI: machine does tasks needing judgment"]
+    R["Rule engines, expert systems"]
+    subgraph ML["ML: learned from data"]
+      C["Classic ML: trees, regression, Isolation Forest"]
+      subgraph DL["Deep Learning: neural networks"]
+        G["Generative AI: LLMs, image models"]
+      end
+    end
+  end
+  DS["Data Science: insight from data"] -. uses .-> ML
+  MO["MLOps: run ML reliably in production"] -. operates .-> ML
+</pre>
+<div class="tbl"><table>
+<tr><th>Field</th><th>Core question</th><th>Output</th><th>Where in NexusOps</th></tr>
+<tr><td>AI</td><td>Can a machine make human-like decisions?</td><td>Any "intelligent" behaviour</td><td>The whole platform</td></tr>
+<tr><td>ML</td><td>Can we learn patterns from data and predict on new data?</td><td>A model</td><td>Anomaly detector, degradation predictor (M4+)</td></tr>
+<tr><td>Deep Learning</td><td>Can multi-layer neural networks learn complex patterns?</td><td>A large model</td><td>Compared later as a sequence model</td></tr>
+<tr><td>Generative AI</td><td>Can we create new content (text, code)?</td><td>Generated content</td><td>AI incident assistant (M13)</td></tr>
+<tr><td>Data Science</td><td>What insight does the data give us?</td><td>Analysis, report, decision</td><td>This week's explore lab</td></tr>
+<tr><td>MLOps</td><td>How do we keep models reproducible, deployable, observable, governable?</td><td>Platform, pipelines, process</td><td>The core goal of the capstone</td></tr>
+</table></div>
+<p><b>Key insight:</b> a Data Scientist asks "does the model work?". An MLOps Engineer asks "is the model still working today, who finds out at 3 a.m. if it stops, and how do we roll back?". Your DevOps/SRE background is built for that second question.</p>
+
+<h3>C2. Traditional programming vs Machine Learning</h3>
+<pre><code>Traditional:     rules  +  data          ──►  program  ──►  answers
+                 (you write: if cpu &gt; 90 then alert)
+
+ML training:     data   +  answers (labels) ──►  algorithm ──►  model (learned rules)
+ML inference:    model  +  new data          ──►  predictions</code></pre>
+<p>Firewall example: traditional means you write the ACL. ML means you show the system thousands of packets, some labelled "attack", and it works out which combination of fields indicates an attack. The difference is who writes the rule: a human, or the data.</p>
+<p>When you do <b>not</b> need ML: if the rule is clear and stable ("certificate expires within 7 days"), ML is unnecessary complexity. Use ML when the pattern is a complex interaction of many variables, you can't write all the rules by hand, and you have historical data.</p>
+
+<h3>C3. Model, parameters, hyperparameters</h3>
+<p>A <b>model</b> is a function <code>f(x) → y</code>. x is the input (one minute of metrics), y is the output (will it breach or not). The numbers inside the function that training sets by itself are <b>parameters</b>. The ones you set by hand before training are <b>hyperparameters</b>.</p>
+<p>Take this week's z-score detector: each service's mean (μ) and standard deviation (σ) are learned from data, so they are parameters. The threshold <code>k = 3</code> is chosen by you, so it is a hyperparameter. TCP analogy: the RTT estimate (SRTT) that the connection learns is a parameter; the initial RTO or the alpha/beta smoothing factors set in kernel config are hyperparameters.</p>
+
+<h3>C4. Types of learning</h3>
+<div class="tbl"><table>
+<tr><th>Type</th><th>Needs labels?</th><th>Question</th><th>NexusOps example</th></tr>
+<tr><td>Supervised: classification</td><td>Yes</td><td>Which category?</td><td>Will the SLO breach in the next 15 minutes? (yes/no)</td></tr>
+<tr><td>Supervised: regression</td><td>Yes</td><td>What number?</td><td>What will p95 latency be in 15 minutes?</td></tr>
+<tr><td>Unsupervised: clustering</td><td>No</td><td>Which items are similar?</td><td>Group services with similar behaviour</td></tr>
+<tr><td>Unsupervised: anomaly detection</td><td>No (or very few)</td><td>What is unusual?</td><td>Which minutes are far from "normal"?</td></tr>
+<tr><td>Reinforcement learning</td><td>Reward signal</td><td>Which action gives the best outcome?</td><td>Auto-remediation. We avoid it on purpose: trial and error in production is risky</td></tr>
+</table></div>
+<div class="note"><b>Real-world gap</b>Production almost never has labels. Nobody marks every minute as "normal" or "incident". There are incident tickets, but they are opened late, have wrong start times, and small degradations never get a ticket. That is why anomaly detection (unsupervised) is so common in the real world. Our synthetic data has perfect labels so we can measure honestly, but we will add label noise on purpose later.</div>
+
+<h3>C5. Features, labels, dataset</h3>
+<p>Think of a dataset as a database table. Each <b>row</b> is one observation: "payments-api, 2026-01-12 14:03 UTC". <b>Features</b> are the input columns: cpu_pct, tcp_retransmit_pct and so on. The <b>label</b> (target) is the column we want to predict: <code>will_breach_15m</code>. At prediction time the label doesn't exist, so the model answers from the features alone.</p>
+
+<h3>C6. Generalization, overfitting, underfitting, bias/variance</h3>
+<p>A model's only job is to do well on <b>data it has not seen</b> (generalization). Doing well on training data is easy: memorise it.</p>
+<div class="grid2">
+<div><p><b>Underfitting (high bias):</b> the model is too simple. Trying to catch every incident with just <code>cpu &gt; 90</code>. A packet_loss incident doesn't raise CPU at all, so it is missed. Bad on both train and test.</p></div>
+<div><p><b>Overfitting (high variance):</b> the model has memorised the noise in the training data. You write an ACL from the exact source-port pattern of last week's DDoS; the next attack changes ports and it fails. Excellent on train, bad on test.</p></div>
+</div>
+<p>Bias/variance trade-off: the more flexible the model, the lower the bias but the higher the variance. The job is to find the right middle, and the only way to measure it is separate test data.</p>
+
+<h3>C7. Data leakage: the most dangerous bug</h3>
+<p>Leakage means the model got information during training that it will not have at real inference time. Result: offline evaluation shows 99%, production falls apart. It's like looking at tomorrow's logs on a monitoring dashboard and saying "I knew it all along".</p>
+<p>Our dataset deliberately contains leakage traps: <code>is_anomaly</code>, <code>incident_type</code> and <code>slo_breach</code> are all labels. None of them may be used as features to predict <code>will_breach_15m</code>. The <i>current</i> value of <code>slo_breach</code> might be known at inference time (you can see current latency), but nobody knows <code>incident_type</code> in real time. In Week 3 we'll see another kind of leakage through random train/test splits on time-series data.</p>
+
+<h3>C8. The statistics you need (only what this week needs)</h3>
+<p>Take five minutes of payments-api p95 latency (ms): <code>140, 150, 145, 155, 900</code>.</p>
+<div class="tbl"><table>
+<tr><th>Measure</th><th>Formula</th><th>On this data</th><th>Infra meaning</th></tr>
+<tr><td>Mean μ</td><td>Σx / n</td><td>1490 / 5 = <b>298</b></td><td>One spike doubled the average. That's why average latency is meaningless in an SLO.</td></tr>
+<tr><td>Median</td><td>sort, take the middle</td><td><b>150</b></td><td>Not affected by outliers. p50 latency = median.</td></tr>
+<tr><td>Variance σ²</td><td>Σ(x − μ)² / n</td><td>≈ 90,626</td><td>How spread out the values are. Units are ms², so hard to read directly.</td></tr>
+<tr><td>Std dev σ</td><td>√σ²</td><td>≈ <b>301</b></td><td>"How far from the average values usually are", in ms.</td></tr>
+<tr><td>Z-score</td><td>(x − μ) / σ</td><td>900 → (900−298)/301 ≈ <b>2.0</b></td><td>The spike inflated μ and σ itself, so z is only 2. That's why μ and σ must be learned from a "normal" period.</td></tr>
+</table></div>
+<p>The last row is this week's biggest statistics lesson: <b>if the data you learn "normal" from contains anomalies, your detector goes blind.</b> You'll see it for yourself in Lab 1.4.</p>
+<p><b>Correlation (Pearson r):</b> from −1 to +1; whether two metrics rise and fall together (linearly). In our data, error_rate and latency have r ≈ 0.70, CPU and latency r ≈ 0.22. Surprised CPU is so weakly correlated? Many incidents (packet_loss, db_pool) raise latency without raising CPU. Correlation is not causation, and it only captures linear relationships.</p>
+
+<h3>C9. Evaluation: confusion matrix, precision, recall</h3>
+<div class="tbl"><table>
+<tr><th></th><th>Actually incident</th><th>Actually normal</th></tr>
+<tr><td><b>Alerted</b></td><td>TP (correct alert)</td><td>FP (false alarm, pointless 3 a.m. page)</td></tr>
+<tr><td><b>Did not alert</b></td><td>FN (missed incident, customer noticed first)</td><td>TN</td></tr>
+</table></div>
+<ul>
+<li><b>Precision</b> = TP / (TP + FP): of the alerts we fired, how many were real? Low precision means alert fatigue.</li>
+<li><b>Recall</b> = TP / (TP + FN): of the real incidents, how many did we catch? Low recall means missed outages.</li>
+</ul>
+<p><b>Why accuracy lies:</b> only 2.52% of minutes in our data are anomalous. A detector that always says "normal" has 97.5% accuracy and recall 0. On imbalanced problems, almost never report accuracy.</p>
+
+<h3>C10. The ML lifecycle, end to end</h3>
+<pre class="mermaid">
+flowchart LR
+  P["1 Problem framing"] --> D["2 Data collect / generate"] --> V["3 Validate"] --> F["4 Features"] --> T["5 Train"] --> E["6 Evaluate vs baseline"]
+  E --> R["7 Register + approve"] --> S["8 Serve"] --> M["9 Monitor"]
+  M -- "drift / decay" --> V
+  E -- "not better" --> F
+</pre>
+<p>It's a loop, not a one-way pipeline. In DevOps CI/CD, changing code triggers a deploy. In ML, the model goes stale even if the code doesn't change, because the world changes (traffic patterns, new services, new hardware). That's called <b>drift</b>, and it's why there's an arrow from monitoring back to retraining.</p>
+<p>This week we do small versions of steps 1, 2 and 6 (a non-ML baseline).</p>
+
+<h3>C11. What NexusOps will predict and detect</h3>
+<div class="tbl"><table>
+<tr><th>Task</th><th>Label</th><th>ML type</th><th>Business question</th></tr>
+<tr><td>Anomaly detection</td><td><code>is_anomaly</code></td><td>Unsupervised (label used only for evaluation)</td><td>"Is any service behaving abnormally right now?"</td></tr>
+<tr><td>Degradation prediction</td><td><code>will_breach_15m</code></td><td>Supervised binary classification</td><td>"Which service will breach its SLO in the next 15 minutes?"</td></tr>
+<tr><td>Root-cause hint</td><td><code>incident_type</code></td><td>Supervised multi-class (later)</td><td>"Probably CPU, memory, network, or DB pool?"</td></tr>
+</table></div>
+<p>SLO definition: a minute is a breach if p95 latency &gt; 450 ms <b>or</b> error rate &gt; 2%. A 15-minute early warning gives the on-call engineer time to shift traffic, scale pods or grow the connection pool before customers are hit.</p>
+
+<h3>C12. The dataset we generate, and why synthetic</h3>
+<p>Four fictional services, shaped like a fintech payment path: <code>api-gateway → auth-svc → payments-api → ledger-db</code>. One sample per minute (like a 60 s Prometheus scrape), 14 days, 80,640 rows in total.</p>
+<p><b>Normal behaviour:</b> a daily traffic cycle (peak 14:00 UTC, trough 02:00), 30% less traffic at weekends, random noise.</p>
+<p><b>Four failure modes</b>, each with its own signature:</p>
+<div class="tbl"><table>
+<tr><th>Incident</th><th>Which metrics move</th><th>Real-world example</th></tr>
+<tr><td>cpu_saturation</td><td>cpu → 97%, latency (quadratic), then errors</td><td>Hot loop, GC storm, noisy neighbour</td></tr>
+<tr><td>memory_leak</td><td>mem → 96%, then latency + errors at the end (OOM kill)</td><td>Unbounded cache, connection leak</td></tr>
+<tr><td>packet_loss</td><td>tcp_retransmit ↑, latency rises linearly, errors</td><td>Bad optic, ToR uplink flap, MTU mismatch</td></tr>
+<tr><td>db_pool_exhaustion</td><td>db_pool → 100%, latency ↑↑, errors</td><td>Slow-query locks, pool too small after scale-out</td></tr>
+</table></div>
+<p>Key design choice: the first 40% of every incident is a gradual build-up (<b>ramp</b>). That ramp is the early-warning signal. Without it, "predict 15 minutes ahead" would be impossible, because there would be no early symptom to predict from.</p>
+<p><b>Why synthetic data is right to start with:</b></p>
+<ol>
+<li><b>Confidentiality:</b> no employer data, IPs or topology. Safe for public GitHub.</li>
+<li><b>Ground truth:</b> we know which minutes are incidents, so we can measure precision/recall honestly. With real data this is the hardest part.</li>
+<li><b>Control:</b> later we can add drift, label noise and cascading failures on purpose to make the problem harder.</li>
+<li><b>Reproducibility:</b> seed + config = exactly the same dataset. It can be regenerated in an air-gapped environment too.</li>
+</ol>
+<p><b>Limitation (remember this):</b> a model can learn the generator's simplifications. Good results on synthetic data are not proof of real-world performance. Saying this unprompted in an interview signals seniority.</p>
+
+<!-- D -->
+<h2 id="d"><span class="k">D</span>Engineering notes</h2>
+<p>Copy these straight into your notebook. They're also in the repo: <code>docs/notes/week01-engineering-notes.md</code>.</p>
+<div class="en">
+<div class="tag">Note 1.1 · Definitions</div>
+<p><b>Machine Learning</b> is the practice of producing a function <code>f(x) → y</code> whose internal parameters are fitted to historical data, rather than written by hand. <b>MLOps</b> is the set of engineering practices that keep that function reproducible, deployable, observable, and governable throughout its life in production. Data Science answers “does a model work?”; MLOps answers “is it still working, who knows when it stops, and how do we roll back?”.</p>
+<div class="tag">Note 1.2 · Vocabulary</div>
+<ul>
+<li><b>Feature (x):</b> an input variable available at prediction time.</li>
+<li><b>Label (y):</b> the outcome to predict; available in training data only.</li>
+<li><b>Parameter:</b> learned during training (e.g. per-service μ, σ).</li>
+<li><b>Hyperparameter:</b> chosen before training (e.g. z-threshold k).</li>
+<li><b>Generalisation:</b> performance on unseen data; the only performance that matters.</li>
+<li><b>Overfitting:</b> low train error, high test error (memorised noise). <b>Underfitting:</b> high error on both (model too simple).</li>
+<li><b>Data leakage:</b> any training-time information that is unavailable at inference time. Produces inflated offline metrics and production failure.</li>
+</ul>
+<div class="tag">Note 1.3 · Statistics</div>
+<ul>
+<li>Mean is outlier-sensitive; median is robust. Latency SLOs use percentiles for this reason.</li>
+<li>σ = √(Σ(x−μ)²/n). Z-score z = (x−μ)/σ expresses distance from normal in units of σ.</li>
+<li>Estimating μ, σ from data that contains anomalies inflates σ and hides the anomalies (masking).</li>
+<li>Pearson r measures linear association only; it is not causation.</li>
+</ul>
+<div class="tag">Note 1.4 · Evaluation</div>
+<ul>
+<li>Precision = TP/(TP+FP) → alert quality. Recall = TP/(TP+FN) → incident coverage.</li>
+<li>On imbalanced data (2.5% positives), accuracy is misleading: an always-negative model scores 97.5%.</li>
+<li>Always evaluate on data the parameters were not fitted on. Every model must beat a simple baseline.</li>
+</ul>
+<div class="tag">Note 1.5 · Dataset v0 contract</div>
+<ul>
+<li>Keys: <code>timestamp</code> (UTC, 1-min), <code>service</code>. Metrics: rps, cpu_pct, mem_pct, p95_latency_ms, error_rate_pct, tcp_retransmit_pct, db_pool_in_use_pct.</li>
+<li>Labels: is_anomaly, incident_type, slo_breach (p95 &gt; 450 ms or errors &gt; 2%), will_breach_15m (breach in t+1..t+15).</li>
+<li>Seed 42 → 80,640 rows, 35 incidents, content_hash <code>d39d3d08801c5478</code>.</li>
+<li>~0.2% of metric cells are NaN (failed scrapes). Labels are computed before blanking.</li>
+<li>The schema is an API contract; changing it is a breaking change that bumps the dataset version.</li>
+</ul>
+</div>
+
+<!-- E -->
+<h2 id="e"><span class="k">E</span>Architecture</h2>
+<h3>E1. The full capstone (what stands after 15 milestones)</h3>
+<pre class="mermaid">
+flowchart TB
+  TS["Telemetry sources<br/>synthetic generator → later Prometheus/OTel"] --> ING["Ingestion"]
+  ING --> RAW["Raw storage + data versioning<br/>Parquet, DVC"]
+  RAW --> VAL["Validation and quality"]
+  VAL --> FE["Feature engineering"]
+  FE --> TR["Training pipeline"]
+  TR --> EXP["Experiment tracking<br/>MLflow"]
+  TR --> EV["Evaluation vs baseline"]
+  EV --> REG["Model registry"]
+  REG --> APR["Approval / promotion gate"]
+  APR --> SRV["Serving API<br/>FastAPI"]
+  SRV --> K8S["Kubernetes + GitOps<br/>Argo CD"]
+  K8S --> MON["Monitoring<br/>Prometheus, Grafana, Evidently"]
+  MON --> DR["Data drift"] & MP["Model performance"] & PM["Prediction monitoring"] & IM["Infra monitoring"]
+  DR & MP --> RT["Retraining pipeline"]
+  RT --> APR
+  MON --> AIA["AI incident assistant (M13)"]
+</pre>
+<p>Each tool arrives only when the problem it solves shows up. This week: just Python, NumPy, pandas, PyArrow and pytest. DVC arrives in Week 2, when we see that Git alone can't answer "which data was dataset v0?".</p>
+
+<h3>E2. This week's architecture</h3>
+<pre class="mermaid">
+flowchart LR
+  CFG["configs/telemetry_v0.yaml<br/>seed, services, SLO, incident mix"] --> GEN["generator.py"]
+  SCH["schema.py<br/>data contract"] --> GEN
+  GEN --> PQ["telemetry_v0.parquet"]
+  GEN --> INC["telemetry_v0_incidents.csv"]
+  GEN --> MAN["telemetry_v0_manifest.json<br/>config_hash, content_hash"]
+  PQ --> EXP["explore_telemetry.py"]
+  PQ --> BL["rule_baseline.py<br/>thresholds vs z-score"]
+  SCH --> TST["tests/ (pytest)"]
+  GEN --> TST
+</pre>
+<div class="tbl"><table>
+<tr><th>Component</th><th>Responsibility</th><th>Depends on</th><th>Failure mode</th></tr>
+<tr><td>Config (YAML)</td><td>The single source of everything that changes the dataset</td><td>Nothing</td><td>Someone changes the seed or SLO but keeps the dataset name → silently different data</td></tr>
+<tr><td>Schema</td><td>Column names, types, valid ranges</td><td>Nothing</td><td>A column rename breaks downstream feature code</td></tr>
+<tr><td>Generator</td><td>Simulates normal + incidents, builds labels</td><td>Config, schema, NumPy RNG</td><td>A library version change alters content_hash</td></tr>
+<tr><td>Manifest</td><td>Lineage: which config + seed + code version produced this file</td><td>Generator</td><td>If the manifest and file drift apart, lineage lies</td></tr>
+<tr><td>Tests</td><td>Enforce the contract and reproducibility</td><td>Generator, schema</td><td>Tests that are too loose let bad data through</td></tr>
+</table></div>
+<p><b>Trade-off decision:</b> Parquet vs CSV vs PostgreSQL. Parquet won because it keeps types (UTC timestamps, int8), is compressed, and reads column-wise fast. CSV loses timezones (see troubleshooting). PostgreSQL/TimescaleDB comes later for ingestion and serving; for a static training dataset it's overkill now. Details: <code>docs/adr/0002-parquet-plus-manifest.md</code>.</p>
+
+<!-- F -->
+<h2 id="f"><span class="k">F</span>Hands-on labs</h2>
+<p>The full starter repo is in project files: <code>nexusops/</code>. Copy it to your laptop (or type the files yourself, which is better for learning). I ran this code; the expected outputs below come straight from real runs.</p>
+
+<h3>Prerequisites</h3>
+<ul>
+<li>Linux or macOS (WSL2 works), Python ≥ 3.11, Git, <code>make</code>, ~200 MB disk.</li>
+<li>Any editor; VS Code is fine. Jupyter is optional and included in the <code>[dev]</code> extra.</li>
+</ul>
+
+<h3>Repository structure</h3>
+<pre><code>nexusops/
+├── configs/telemetry_v0.yaml        <span class="c"># every knob that changes the dataset</span>
+├── src/nexusops/
+│   ├── __init__.py
+│   └── telemetry/
+│       ├── schema.py                <span class="c"># data contract: columns, dtypes, valid ranges</span>
+│       └── generator.py             <span class="c"># normal behaviour + incidents + labels + manifest</span>
+├── scripts/
+│   ├── generate_telemetry.py        <span class="c"># CLI wrapper</span>
+│   ├── explore_telemetry.py         <span class="c"># first look at the data</span>
+│   └── rule_baseline.py             <span class="c"># non-ML baseline: thresholds vs z-score</span>
+├── tests/test_generator.py          <span class="c"># 10 data tests</span>
+├── docs/adr/  docs/notes/  docs/lessons/
+├── data/raw/                        <span class="c"># generated, git-ignored</span>
+├── pyproject.toml  Makefile  .gitignore  README.md  PROGRESS.md</code></pre>
+
+<h3>Lab 1.1 · Environment setup (20 min)</h3>
+<pre><code><span class="p">$</span> cd ~/work && git init nexusops && cd nexusops
+<span class="c"># copy the starter files here, then:</span>
+<span class="p">$</span> python3 --version                 <span class="c"># must be 3.11+</span>
+<span class="p">$</span> python3 -m venv .venv
+<span class="p">$</span> source .venv/bin/activate
+<span class="p">$</span> pip install --upgrade pip
+<span class="p">$</span> pip install -e ".[dev]"
+<span class="p">$</span> python -c "import nexusops, numpy, pandas, pyarrow; print(nexusops.__version__, numpy.__version__, pandas.__version__)"
+0.1.0 2.x.x 2.x.x            <span class="c"># versions may differ; note them in PROGRESS.md</span></code></pre>
+<p><b>Why a venv:</b> it's the "network namespace" of Python. Each project gets its own isolated dependency set without polluting system Python. <b>Why <code>pip install -e .</code>:</b> an "editable" install makes <code>src/nexusops</code> importable from anywhere, and code edits take effect without reinstalling. The <code>src/</code> layout is deliberate: it stops you from accidentally importing uninstalled code from the repo root.</p>
+<p><b>Air-gap note:</b> on an online machine run <code>pip download -d wheels/ -e ".[dev]"</code>, copy the wheels over, then run <code>pip install --no-index --find-links wheels/ -e ".[dev]"</code> on the offline one. We do this properly in Milestone 14.</p>
+
+<h3>Lab 1.2 · Generate dataset v0 (30 min)</h3>
+<p>Read the config first: <code>configs/telemetry_v0.yaml</code>. The key parts of the generator:</p>
+<pre><code><span class="c"># 1. One seeded RNG for everything -> reproducible</span>
+rng = np.random.default_rng(cfg["seed"])
+
+<span class="c"># 2. Normal traffic: daily cycle (peak 14:00 UTC) x weekend dip x noise</span>
+diurnal = 1.0 + 0.4 * np.cos(2 * np.pi * (minute_of_day - 840) / 1440)
+load    = diurnal * weekly * (1 + rng.normal(0, 0.05, n))
+
+<span class="c"># 3. Incidents ramp from 0.05 to 1 over the first 40%, then plateau</span>
+s = _severity_curve(inc.duration, ramp_fraction)
+if inc.kind == "packet_loss":
+    retrans[sl]  += 6.0 * s           <span class="c"># network symptom first</span>
+    lat_mult[sl] *= 1 + 5.0 * s       <span class="c"># then latency</span>
+
+<span class="c"># 4. Latency rises non-linearly near CPU saturation (queueing)</span>
+latency = base * (1 + 0.5 * (cpu / 100) ** 3) * rng.lognormal(0, 0.08, n) * lat_mult
+
+<span class="c"># 5. Labels: breach now, and breach in the NEXT 15 minutes (looks forward!)</span>
+breach = (latency &gt; 450) | (errors &gt; 2.0)
+will_breach_15m = _future_any(breach, horizon=15)
+
+<span class="c"># 6. Failed scrapes: blank ~0.2% of metric cells AFTER labels are computed</span></code></pre>
+<p>Notice latency uses <code>lognormal</code> noise, not normal. Latency is never negative and its distribution has a long right tail (right-skewed), exactly like the p95 graphs you've seen in real dashboards. <code>(cpu/100)**3</code> is a simplified piece of queueing theory: as utilization approaches 100%, wait time explodes.</p>
+<pre><code><span class="p">$</span> make data          <span class="c"># = python scripts/generate_telemetry.py --config configs/telemetry_v0.yaml --out-dir data/raw</span></code></pre>
+<p><b>Expected output</b> (real run, seed 42):</p>
+<pre><code>{
+  "dataset": "telemetry_v0",
+  "generator_version": "0.1.0",
+  "config_hash": "8921b621f99e2d53",
+  "seed": 42,
+  "rows": 80640,
+  "content_hash": "d39d3d08801c5478",
+  "file": "telemetry_v0.parquet",
+  "file_bytes": 5899075,
+  "incidents": 35,
+  "anomaly_rate": 0.0252,
+  "slo_breach_rate": 0.0164,
+  "will_breach_15m_rate": 0.0225
+}</code></pre>
+<p><b>Validation:</b></p>
+<pre><code><span class="p">$</span> ls -lh data/raw/
+<span class="p">$</span> python scripts/generate_telemetry.py --out-dir /tmp/run2 | grep content_hash   <span class="c"># must equal the first run</span>
+<span class="p">$</span> python scripts/generate_telemetry.py --out-dir /tmp/run3 --seed 7 | grep content_hash   <span class="c"># must differ</span></code></pre>
+
+<h3>Lab 1.3 · Explore the dataset (40 min)</h3>
+<pre><code><span class="p">$</span> make explore</code></pre>
+<p>Key parts of the expected output:</p>
+<pre><code>== shape: 80,640 rows x 13 columns
+== time range: 2026-01-05 00:00:00+00:00  ->  2026-01-18 23:59:00+00:00
+
+== per-service mean / median / std for p95_latency_ms
+               mean  median    std     max
+api-gateway    92.8    81.8   69.6   805.0
+auth-svc       66.1    60.9   41.4   573.1
+ledger-db      28.5    26.1   17.8   251.4
+payments-api  158.8   144.6  103.2  1380.2
+
+== normal vs incident minutes: median of each metric
+is_anomaly               0       1
+p95_latency_ms       70.28  340.95
+error_rate_pct        0.17    1.83
+tcp_retransmit_pct    0.06    0.07
+...
+== label rates
+  is_anomaly       2.52%
+  slo_breach       1.64%
+  will_breach_15m  2.25%
+
+== correlation of metrics with p95_latency_ms (Pearson)
+error_rate_pct        0.695
+tcp_retransmit_pct    0.390
+cpu_pct               0.215</code></pre>
+<p><b>What to notice:</b></p>
+<ol>
+<li>Every service has mean &gt; median. That's right skew: a few big spikes pull the average up.</li>
+<li>During incidents, the median tcp_retransmit only moves 0.06 → 0.07. Why? Only packet_loss, one of the four incident types, raises retransmits, so the overall median doesn't move. Aggregate statistics can hide a specific failure mode. Try it: <code>df[df.incident_type=="packet_loss"].tcp_retransmit_pct.median()</code> (you should get about 6.06).</li>
+<li><code>slo_breach</code> (1.64%) &lt; <code>is_anomaly</code> (2.52%). Many anomalous minutes (the start of the ramp) haven't breached the SLO yet. That gap is the early-warning opportunity.</li>
+</ol>
+<p>Optional Jupyter: run <code>jupyter lab</code>, load <code>pd.read_parquet("data/raw/telemetry_v0.parquet")</code> and plot an incident window (<code>df[df.service=="payments-api"].set_index("timestamp")["p95_latency_ms"].plot()</code>).</p>
+
+<h3>Lab 1.4 · Non-ML baseline (40 min)</h3>
+<p>Before any ML you must build a baseline. Otherwise "the model got 0.85 recall" means nothing; maybe an if-statement gets 0.90. <code>scripts/rule_baseline.py</code> has two detectors:</p>
+<ul>
+<li><b>Static thresholds:</b> how a NOC does it today. cpu &gt; 90, mem &gt; 90, latency &gt; 450, errors &gt; 2, retransmit &gt; 2, db_pool &gt; 90.</li>
+<li><b>Z-score per service:</b> learns μ and σ (parameters) for each metric of each service from the first 7 days, then flags |z| &gt; k (hyperparameter).</li>
+</ul>
+<p>Evaluation uses days 8–14 only, which the z-score never saw when learning μ and σ. This is your first train/test split.</p>
+<pre><code><span class="p">$</span> make baseline
+Evaluated on days 8-14 only (the 'unseen' half).
+
+static_thresholds    {'TP': 856, 'FP': 0, 'FN': 288, 'TN': 39176, 'precision': 1.0, 'recall': 0.748}
+zscore_k3.0          {'TP': 1047, 'FP': 243, 'FN': 97, 'TN': 38933, 'precision': 0.812, 'recall': 0.915}</code></pre>
+<p><b>Interpretation:</b> static thresholds never fired a false alert (precision 1.0) but missed 25% of incident minutes, mostly the start of the ramp when nothing has crossed a threshold yet. The z-score catches earlier (recall 0.915) but fires 243 false alarms. <b>Precision 1.0 is a synthetic-data artefact:</b> our normal noise never reaches 90%. On real data, thresholds fire false alarms too.</p>
+<p>Now think about this: the z-score's μ and σ were learned from the first 7 days, <b>which also contained incidents</b>. That's the masking problem from C8 happening here. You'll fix it in the assignment.</p>
+
+<h3>Lab 1.5 · Data tests (20 min)</h3>
+<pre><code><span class="p">$</span> make test
+..........                                                               [100%]
+10 passed in 1.21s</code></pre>
+<p>What the tests check, and why:</p>
+<div class="tbl"><table>
+<tr><th>Test</th><th>What it catches</th></tr>
+<tr><td>test_schema_columns_and_order</td><td>Renamed or reordered columns (contract break)</td></tr>
+<tr><td>test_row_count, test_no_duplicate_keys</td><td>Missing or duplicate (timestamp, service) rows, e.g. a duplicate scrape</td></tr>
+<tr><td>test_value_ranges</td><td>Impossible values such as 120% CPU or negative latency</td></tr>
+<tr><td>test_missing_rate_close_to_config</td><td>More missing data than configured (pipeline bug)</td></tr>
+<tr><td>test_same_seed_same_data / different_seed</td><td>Reproducibility, and that the seed actually does something</td></tr>
+<tr><td>test_labels_are_binary_and_not_empty</td><td>All-zero labels or implausibly high rates</td></tr>
+<tr><td>test_incident_type_consistent_with_is_anomaly</td><td>Labels that contradict each other</td></tr>
+<tr><td>test_future_label_looks_forward_not_at_now</td><td>Off-by-one bugs in <code>will_breach_15m</code></td></tr>
+</table></div>
+
+<h3>Cleanup</h3>
+<pre><code><span class="p">$</span> make clean                 <span class="c"># removes data/raw/* and caches; code and config stay</span>
+<span class="p">$</span> rm -rf /tmp/run2 /tmp/run3
+<span class="p">$</span> deactivate                 <span class="c"># leave the venv; delete .venv/ only if you want a full reset</span></code></pre>
+
+<!-- G -->
+<h2 id="g"><span class="k">G</span>Real-world scenario: the Friday-evening payment slowdown</h2>
+<p>7 p.m. on a Friday at a fintech, salary day. Traffic is 1.5× normal. At 18:42, payments-api p95 latency starts creeping up from 160 ms. At the same time tcp_retransmit rises from 0.05% to 1.2%. The cause: an uplink optic on a ToR switch is degrading and CRC errors are climbing, but the link hasn't gone down, so there's no link-state alert.</p>
+<p>At 18:58 latency crosses 450 ms and the static alert fires. By then customers have been seeing transaction timeouts for 16 minutes, some retries risk duplicate charges, and support tickets are arriving. The on-call engineer spends the first 10 minutes in application logs, because the alert says "latency", not "network".</p>
+<p><b>With NexusOps:</b> around 18:45 the degradation predictor would say "payments-api: high probability of SLO breach within 15 minutes", and the root-cause hint would say "retransmit pattern, probably network". The engineer shifts traffic to another AZ before the breach.</p>
+<p><b>Your task (think it through and write it down):</b></p>
+<ol>
+<li>Which incident_type in our dataset matches this scenario? Which metric moves first?</li>
+<li>Would the static threshold <code>tcp_retransmit &gt; 2.0</code> ever have fired here? Why not?</li>
+<li>What does a false 15-minute warning (false positive, an unnecessary traffic shift) cost? What does a miss (false negative) cost? Which is more expensive, and what does that say about choosing precision vs recall?</li>
+</ol>
+
+<!-- H -->
+<h2 id="h"><span class="k">H</span>AI-assisted engineering</h2>
+<p>AI coding agents (such as Claude Code) will speed you up, but AI mistakes in ML code are the most dangerous kind: wrong ML code usually doesn't crash, it just quietly produces wrong numbers.</p>
+<div class="tbl"><table>
+<tr><th>Task</th><th>Example prompt for this week</th><th>How you validate it yourself</th></tr>
+<tr><td>Understand unfamiliar code</td><td>“Explain <code>_future_any</code> line by line and trace it on a small array.”</td><td>Trace <code>[0,0,0,1,0,0]</code> with horizon 2 by hand and compare with the test.</td></tr>
+<tr><td>Boilerplate</td><td>“Add a retry_storm incident type following the existing pattern.”</td><td>Read the diff. Did the schema change? Do all tests pass? Do you understand why content_hash changed?</td></tr>
+<tr><td>Code review</td><td>“Look for leakage or off-by-one risks in generator.py.”</td><td>For each claim, write a failing test to see if it's real.</td></tr>
+<tr><td>Explain errors</td><td>Paste the full traceback with your environment (Python, pandas versions).</td><td>Can you write one line yourself explaining why the fix works?</td></tr>
+<tr><td>Write tests</td><td>“Write property-style tests from VALID_RANGES.”</td><td>Inject a bug on purpose and check the test fails (test the test).</td></tr>
+<tr><td>Documentation</td><td>“Draft a dataset card from manifest.json.”</td><td>Check every number against the manifest or explore output.</td></tr>
+<tr><td>Architecture review</td><td>“Argue against ADR-0002.”</td><td>The AI doesn't know your constraints (air-gap, team size); judge it yourself.</td></tr>
+<tr><td>Help with experiments</td><td>“Give me a script that tabulates precision/recall for k = 2, 2.5, 3, 4.”</td><td>Check one k by hand against its confusion matrix.</td></tr>
+</table></div>
+<h3>Guardrails</h3>
+<div class="tbl"><table>
+<tr><th>Risk</th><th>Rule</th></tr>
+<tr><td>Secrets</td><td>Never put <code>.env</code>, kubeconfig or cloud keys in a prompt or the repo. <code>.env</code> is in <code>.gitignore</code>. Secret scanning arrives in Week 12.</td></tr>
+<tr><td>Data privacy</td><td>Never paste your employer's real metrics, hostnames, IPs or logs into an AI tool. Synthetic data only.</td></tr>
+<tr><td>Hallucination</td><td>AI can invent pandas parameters or library APIs that don't exist. Check the official docs and run it.</td></tr>
+<tr><td>Dependency risk</td><td>Before installing a package the AI suggests: check the PyPI name is correct (typosquatting), the maintainer, the last release. Pin versions.</td></tr>
+<tr><td>Model-generated code</td><td>Never merge without reading the diff. In ML code "it runs" doesn't mean "it's right"; you need tests that check the numbers.</td></tr>
+<tr><td>Production changes</td><td>No AI agent access to production clusters or prod credentials. Labs run locally or in disposable environments only.</td></tr>
+<tr><td>Tool permissions</td><td>Least privilege: writing in the repo folder is fine; <code>rm -rf</code>, <code>git push --force</code> and <code>kubectl delete</code> need your approval.</td></tr>
+</table></div>
+
+<!-- I -->
+<h2 id="i"><span class="k">I</span>Troubleshooting</h2>
+
+<div class="ts"><h3>1. <code>ModuleNotFoundError: No module named 'nexusops'</code></h3><dl>
+<dt>Symptom</dt><dd>Running <code>python scripts/generate_telemetry.py</code> fails immediately.</dd>
+<dt>Investigate</dt><dd>Does <code>which python</code> show <code>.venv/bin/python</code> or <code>/usr/bin/python3</code>? Does <code>pip show nexusops</code> show anything?</dd>
+<dt>Root cause</dt><dd>The venv isn't activated, or <code>pip install -e .</code> ran in a different environment. The <code>src/</code> layout deliberately blocks imports without an install.</dd>
+<dt>Resolve</dt><dd><code>source .venv/bin/activate && pip install -e ".[dev]"</code>, or use <code>make data</code> (the Makefile calls <code>.venv/bin/python</code> directly).</dd>
+<dt>Prevent</dt><dd>Run everything through the Makefile; show the venv name in your shell prompt.</dd>
+</dl></div>
+
+<div class="ts"><h3>2. <code>ImportError: Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'</code></h3><dl>
+<dt>Symptom</dt><dd>Crash at the end of generation, while writing Parquet.</dd>
+<dt>Investigate</dt><dd><code>python -c "import pyarrow"</code>. <code>pip list | grep -i arrow</code>.</dd>
+<dt>Root cause</dt><dd>pandas can't write Parquet on its own; it needs the PyArrow engine. You ran <code>pip install pandas numpy</code> by hand instead of installing the project's dependencies. (This happened in my own environment while building this lesson.)</dd>
+<dt>Resolve</dt><dd>Run <code>pip install -e ".[dev]"</code> again; pyarrow is declared in pyproject.</dd>
+<dt>Prevent</dt><dd>Declare dependencies only in <code>pyproject.toml</code>, never install ad hoc. A lock file comes in Week 6.</dd>
+</dl></div>
+
+<div class="ts"><h3>3. Your content_hash doesn't match <code>d39d3d08801c5478</code></h3><dl>
+<dt>Symptom</dt><dd>Row count is 80,640 as expected, but the hash differs.</dd>
+<dt>Investigate</dt><dd>(a) Does <code>config_hash</code> match? If not, the config changed. (b) If it matches, compare <code>numpy</code>/<code>pandas</code> versions. (c) Do two runs on the same machine match each other?</dd>
+<dt>Root cause</dt><dd>Reproducibility = code + config + seed + <b>library versions</b>. Some NumPy distributions or pandas hashing can change between versions. The seed alone isn't enough.</dd>
+<dt>Resolve</dt><dd>If two runs on your machine match, that's your reference hash; record it with the versions in PROGRESS.md.</dd>
+<dt>Prevent</dt><dd>Record library versions in the manifest (part of the assignment), and later use a lock file plus a container image.</dd>
+</dl></div>
+
+<div class="ts"><h3>4. Reading from CSV gives <code>TypeError: Invalid comparison between dtype=datetime64[ns] and Timestamp</code> (tz-naive vs tz-aware)</h3><dl>
+<dt>Symptom</dt><dd>After generating with <code>--format csv</code>, the baseline or your own code crashes on timestamp comparisons, or shows wrong times.</dd>
+<dt>Investigate</dt><dd>Check <code>df["timestamp"].dtype</code>: is it <code>datetime64[ns, UTC]</code>, or <code>object</code>/<code>datetime64[ns]</code>?</dd>
+<dt>Root cause</dt><dd>CSV has no types. Timestamps become strings, and timezone information can be lost on parse. It's the same old bug as mixing local time and UTC in network logs.</dd>
+<dt>Resolve</dt><dd><code>pd.read_csv(path, parse_dates=["timestamp"])</code>, then <code>df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)</code>.</dd>
+<dt>Prevent</dt><dd>Keep Parquet as the source of truth (ADR-0002). Always UTC.</dd>
+</dl></div>
+
+<!-- J -->
+<h2 id="j"><span class="k">J</span>Weekly assignment (capstone deliverable)</h2>
+<p><b>Deliverable: “Dataset v0.1 + honest baseline”</b>, committed to your local <code>nexusops</code> Git repo.</p>
+<ol>
+<li><b>New failure mode <code>retry_storm</code>:</b> client retries triple rps, and cpu, errors and latency rise. Add it to the generator, give it a weight in the config, and write a test proving that median rps during retry_storm minutes is at least 2× normal. No schema change needed.</li>
+<li><b>Library versions in the manifest:</b> add <code>numpy</code>, <code>pandas</code>, <code>pyarrow</code> and the Python version.</li>
+<li><b>Fix z-score masking:</b> in <code>rule_baseline.py</code>, learn μ and σ only from the <i>normal</i> minutes of the first 7 days (<code>is_anomaly == 0</code>). Compare precision/recall before and after. If the result is the opposite of what you expected, that's the learning moment: what happens to z when σ gets smaller? Then think: real data has no is_anomaly label, so what would you do? (Hint: median and MAD.)</li>
+<li><b>Hyperparameter sweep:</b> precision/recall table for k = 2, 2.5, 3, 4 in <code>reports/week01_zscore_sweep.md</code>. Pick a k and justify it in two lines using the costs from scenario G.</li>
+<li><b>Dataset card</b> in <code>docs/notes/week01-dataset-card.md</code>: what's in it, how it's made, label definitions, known limitations, and what it should not be used for. Write it yourself; if an AI drafts it, verify every number.</li>
+</ol>
+
+<!-- K -->
+<h2 id="k"><span class="k">K</span>Success criteria</h2>
+<ul class="check">
+<li><code>make test</code>: all tests pass, including the new retry_storm test (≥ 11 tests).</li>
+<li>The same config run twice gives the same <code>content_hash</code>; the manifest includes library versions.</li>
+<li>Dataset v0.1 has 5 incident types, each with at least 1 incident.</li>
+<li>Normal-only z-score: report how precision/recall changed at k=3 and explain <b>why</b> in one paragraph (the result may surprise you). Then find a k in the sweep where precision &gt; 0.812 and recall ≥ 0.90 together.</li>
+<li>The sweep table has 4 values of k, each with TP/FP/FN/precision/recall, and a written decision.</li>
+<li>The dataset card lists at least 3 known limitations.</li>
+<li>Without notes, you can explain on a whiteboard: precision vs recall, parameter vs hyperparameter, and one example of leakage.</li>
+</ul>
+
+<!-- L -->
+<h2 id="l"><span class="k">L</span>Interview preparation</h2>
+
+<div class="qa"><div class="lvl">Fundamentals</div><div class="q">1. What is the difference between AI, ML, and MLOps?</div>
+<p>AI is the broad goal of machines performing tasks that need judgment, including hand-written rule engines. ML is the subset where the behaviour is learned from data: you provide examples and an algorithm fits parameters of a function. MLOps is the engineering discipline that makes ML systems reproducible, deployable, observable and governable in production, covering data versioning, experiment tracking, model registry, CI/CD, monitoring and retraining. A useful one-liner: Data Science asks whether a model works; MLOps makes sure it keeps working and that you know when it stops.</p></div>
+
+<div class="qa"><div class="lvl">Fundamentals</div><div class="q">2. Parameters vs hyperparameters, with an example.</div>
+<p>Parameters are learned from the training data; hyperparameters are set before training and control how learning happens. In a z-score detector, each service's mean and standard deviation are parameters estimated from history, while the threshold k is a hyperparameter. In a random forest, split thresholds are parameters; the number of trees and max depth are hyperparameters. Hyperparameters are tuned on validation data, never on the test set, otherwise the test score is optimistically biased.</p></div>
+
+<div class="qa"><div class="lvl">Fundamentals</div><div class="q">3. Why is accuracy a poor metric for incident detection?</div>
+<p>Incidents are rare. In my dataset 2.5% of minutes are anomalous, so a model that always predicts "normal" gets 97.5% accuracy and catches nothing. Precision (how many alerts were real) and recall (how many incidents were caught) separate the two error types, which have very different costs: false positives cause alert fatigue, false negatives cause customer-visible outages. For ranking quality across thresholds I would add PR-AUC rather than ROC-AUC, because ROC-AUC looks good on heavily imbalanced data.</p></div>
+
+<div class="qa"><div class="lvl">Intermediate</div><div class="q">4. Explain overfitting and how you would detect it.</div>
+<p>Overfitting is when a model fits noise specific to the training sample, so training error is low but error on unseen data is high. You detect it by comparing training and held-out performance: a large gap is the signal. For time-series telemetry the held-out set must be later in time than the training set; a random split leaks future patterns and hides overfitting. Remedies are simpler models, regularisation, more data, and better features, all validated on a proper time-based split.</p></div>
+
+<div class="qa"><div class="lvl">Intermediate</div><div class="q">5. What is data leakage? Give an infrastructure example.</div>
+<p>Leakage is any information available during training that would not be available at prediction time, which inflates offline metrics. Example: predicting "SLO breach in 15 minutes" with a feature computed from a rolling window that includes the next 5 minutes, or using the incident ticket category as a feature when tickets are only created after the incident. Prevention: define for each feature exactly when it becomes known, build features with only past data, split by time, and write tests that assert features at time t only depend on rows at or before t.</p></div>
+
+<div class="qa"><div class="lvl">Intermediate</div><div class="q">6. Why did you start with synthetic data, and what are the risks?</div>
+<p>Three reasons: real production telemetry is confidential, it lacks ground-truth labels so evaluation would be guesswork, and synthetic data gives control over difficulty and full reproducibility from a seed and config. The risk is that models learn the generator's simplifications, so a good score is not evidence of real-world performance. I mitigate that by documenting limitations in a dataset card, deliberately adding noise, drift and label errors in later versions, and planning a transfer test on a public dataset or lab-scraped Prometheus data.</p></div>
+
+<div class="qa"><div class="lvl">Senior</div><div class="q">7. What does "reproducible dataset" mean in practice, and how do you prove it?</div>
+<p>Same inputs produce byte-for-byte or value-for-value identical data. Inputs include code version, configuration, random seed, and library versions; the seed alone is not enough because random-number and hashing implementations can change across NumPy or pandas releases. I record all of them in a manifest alongside a content hash of the data values, and a test regenerates the data and asserts the hash. In production, the same idea extends to pinned dependencies, container images, and a data-versioning tool that ties a dataset hash to a Git commit.</p></div>
+
+<div class="qa"><div class="lvl">Senior</div><div class="q">8. A team wants to replace threshold alerting with an ML model. How do you decide if it is worth it?</div>
+<p>First, frame the decision: which outcome improves (earlier detection, fewer pages) and what each error costs. Second, build the strongest simple baseline, tuned thresholds and robust statistics, and evaluate both on the same time-based held-out data with precision, recall and lead time. Third, count operating cost: data pipelines, retraining, monitoring for drift, explainability for on-call engineers, and the failure mode when the model is wrong. Ship the model only if it beats the baseline by a margin that justifies that cost, run it in shadow mode first, and keep the thresholds as a safety net.</p></div>
+
+<!-- M -->
+<h2 id="m"><span class="k">M</span>Resources</h2>
+<p>Few, but the most useful. I couldn't live-check these links from my environment (network blocked), so if one doesn't open, search by its title.</p>
+<div class="tbl"><table>
+<tr><th>Resource</th><th>Why</th><th>How much this week</th></tr>
+<tr><td><a href="https://developers.google.com/machine-learning/crash-course" target="_blank" rel="noopener">Google ML Crash Course</a></td><td>ML fundamentals, short and practical</td><td>“Introduction to ML” and “Classification: accuracy, precision, recall” modules</td></tr>
+<tr><td><a href="https://developers.google.com/machine-learning/guides/rules-of-ml" target="_blank" rel="noopener">Rules of Machine Learning (Martin Zinkevich)</a></td><td>An engineering view of production ML; the "baseline first" philosophy</td><td>Rules #1 to #10</td></tr>
+<tr><td><a href="https://papers.nips.cc/paper/5656-hidden-technical-debt-in-machine-learning-systems" target="_blank" rel="noopener">Hidden Technical Debt in ML Systems (NeurIPS 2015)</a></td><td>The founding paper on why MLOps is needed</td><td>All of it, ~9 pages</td></tr>
+<tr><td><a href="https://sre.google/sre-book/service-level-objectives/" target="_blank" rel="noopener">Google SRE Book: Service Level Objectives</a></td><td>Our label (SLO breach) comes from here</td><td>The whole chapter (skim if already read)</td></tr>
+<tr><td><a href="https://pandas.pydata.org/docs/getting_started/index.html" target="_blank" rel="noopener">pandas Getting Started</a></td><td>All the data manipulation in the labs</td><td>“10 minutes to pandas”</td></tr>
+<tr><td>Chip Huyen, <i>Designing Machine Learning Systems</i> (O’Reilly, 2022)</td><td>The main textbook for the whole journey</td><td>Chapters 1–2</td></tr>
+<tr><td><a href="https://www.youtube.com/@statquest" target="_blank" rel="noopener">StatQuest (YouTube)</a></td><td>The clearest visual explanations of statistics</td><td>“Mean, variance, standard deviation” and “Confusion matrix”</td></tr>
+</table></div>
+
+<!-- N -->
+<h2 id="n"><span class="k">N</span>Reflection</h2>
+<p>Write your answers in <code>docs/notes/week01-reflection.md</code>. There are no right answers; the reasoning is what counts.</p>
+<ol>
+<li>In a production system you've worked on, which alert would have been better with ML, and which would have been <b>worse</b>? Why?</li>
+<li>The generator's incident ramp is 40%. If it were 5%, what would happen to 15-minute prediction? Which real-world failures have no ramp at all (power loss, a bad config push)?</li>
+<li>We built labels <b>before</b> injecting missing values. In the real world it's the other way round. How could that distort evaluation?</li>
+<li>In our data, the 4 services fail independently. On a real payment path, what happens upstream when ledger-db slows down? How could that confuse a model?</li>
+<li>One FP (an unnecessary traffic shift) vs one FN (a 15-minute payment outage): from your fintech experience, what's the cost ratio? How does that affect your choice of k?</li>
+</ol>
+
+<!-- O -->
+<h2 id="o"><span class="k">O</span>Progress tracking</h2>
+<p>This is also in the repo's <code>PROGRESS.md</code>; tick the checkboxes as you finish labs. When you say “Continue NexusOps — Week 2”, I'll pick up from here.</p>
+<div class="tbl"><table>
+<tr><th>Area</th><th>Status</th></tr>
+<tr><td>Completed weeks</td><td>Week 1: ML foundations, capstone architecture, dataset v0, non-ML baseline</td></tr>
+<tr><td>Skills learned</td><td>AI/ML/DL/GenAI/DS/MLOps; learning types; features, labels, parameters, hyperparameters; over/underfitting; bias/variance; leakage; mean, median, σ, z-score, correlation; confusion matrix, precision, recall</td></tr>
+<tr><td>Labs</td><td>1.1 setup · 1.2 generate · 1.3 explore · 1.4 baseline · 1.5 data tests</td></tr>
+<tr><td>Milestones</td><td>M1 in progress · M2 dataset v0 done (v0.1 is your assignment)</td></tr>
+<tr><td>Technical decisions</td><td>ADR-0001 synthetic labelled telemetry first · ADR-0002 Parquet + JSON manifest, DVC deferred</td></tr>
+<tr><td>Baseline to beat</td><td>Thresholds P 1.000 / R 0.748 · Z-score k=3 P 0.812 / R 0.915 (days 8–14)</td></tr>
+<tr><td>Knowledge gaps</td><td>Probability distributions, sampling, confidence intervals; robust statistics (median/MAD); time-series split</td></tr>
+<tr><td>Week 2 preview</td><td>Data validation and data versioning: schema enforcement, data quality checks, handling missing data and outliers, DVC, probability and distributions</td></tr>
+</table></div>
+
+<div class="final" id="before">
+<h2 style="margin-top:1rem"><span class="k">→</span>Exactly what to finish before Week 2</h2>
+<ul class="check">
+<li>Run Labs 1.1–1.5; <code>make test</code> is green; your reference <code>content_hash</code> and library versions are recorded in PROGRESS.md.</li>
+<li>Commit all 5 parts of assignment J (a local Git repo is enough; pushing to GitHub is optional, keep it private).</li>
+<li>The sweep table and your chosen k are in <code>reports/week01_zscore_sweep.md</code>.</li>
+<li><code>docs/notes/week01-dataset-card.md</code> and <code>week01-reflection.md</code> are written.</li>
+<li>Read the Hidden Technical Debt paper and Huyen Ch. 1.</li>
+<li>Bring to Week 2: your sweep results, the new normal-only z-score precision/recall, and where you got stuck.</li>
+</ul>
+<p>Then write: <b>“Continue NexusOps — Week 2”</b>.</p>
+</div>
+</main>
+</div>
